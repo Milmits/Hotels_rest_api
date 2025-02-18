@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Детали отеля</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+<div class="container mt-5">
+    <h2 id="hotelName"></h2>
+    <p id="hotelAddress"></p>
+    <h4>Забронировать номер</h4>
+    <form id="bookingForm">
+        <div class="mb-3">
+            <input type="text" id="customerName" class="form-control" placeholder="Ваше имя" required>
+        </div>
+        <div class="mb-3">
+            <input type="text" id="customerPhone" class="form-control" placeholder="Телефон" required>
+        </div>
+        <div class="mb-3">
+            <input type="number" id="roomNumber" class="form-control" placeholder="Номер комнаты" required>
+        </div>
+        <div class="mb-3">
+            <label>Категория:</label>
+            <select id="roomCategory" class="form-select">
+                <option value="STANDARD">Стандарт</option>
+                <option value="COMFORT">Комфорт</option>
+                <option value="LUXURY">Люкс</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <input type="date" id="checkIn" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <input type="date" id="checkOut" class="form-control" required>
+        </div>
+        <button type="button" class="btn btn-success" onclick="createBooking()">Забронировать</button>
+    </form>
+</div>
+
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const hotelId = urlParams.get("id");
+
+    axios.get(`http://localhost:8080/property-view/hotels/${hotelId}`)
+        .then(response => {
+            const hotel = response.data;
+            document.getElementById("hotelName").innerText = hotel.name;
+            document.getElementById("hotelAddress").innerText = hotel.city + ", " + hotel.street;
+        })
+        .catch(error => console.error("Ошибка загрузки отеля:", error));
+
+    function createBooking() {
+        const booking = {
+            hotel: { id: hotelId },
+            customerName: document.getElementById("customerName").value,
+            customerPhone: document.getElementById("customerPhone").value,
+            roomNumber: document.getElementById("roomNumber").value,
+            category: document.getElementById("roomCategory").value,
+            checkInDate: document.getElementById("checkIn").value,
+            checkOutDate: document.getElementById("checkOut").value
+        };
+
+        axios.post("http://localhost:8080/api/bookings", booking)
+            .then(response => {
+                alert("Бронирование успешно создано!");
+                window.location.href = "index.html";
+            })
+            .catch(error => alert("Ошибка бронирования: " + error.response.data));
+    }
+</script>
+</body>
+</html>
+
